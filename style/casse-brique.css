@@ -1,0 +1,11 @@
+body {
+    background-color: #fff8dc;
+    background: linear-gradient( to top mediumAquaMarine, mediumTurquoise);
+}
+
+#ZoneDeJeu {
+    display: block;
+    margin: auto;
+    border: 1px solid #b22222;
+    background-color: #fff8dc;
+}
