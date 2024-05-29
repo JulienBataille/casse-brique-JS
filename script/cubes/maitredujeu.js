@@ -1,76 +1,75 @@
 class MaitreDuJeu {
-    constructor() {
-        this.me = this;
-        this.reset();
-    }
+	constructor(){
+		this.me = this;
+		this.reset();
+	}
+	
+	reset(){
+		this.lives = 3;
+		this.score = 0;
+	}
+	
+	draw(ctx){
+		this.drawScore(ctx);
+		this.drawLives(ctx);
+	}
+	
+	drawScore(ctx) {
+		ctx.font = "16px Arial";
+		ctx.fillStyle = "#0095DD";
+		ctx.fillText("Score : "+this.score, 8, 20);
+	}
+	
+	drawLives(ctx) {
+		ctx.font = "16px Arial";
+		ctx.fillStyle = "#0095DD";
+		ctx.fillText("Lives : "+this.lives, zoneDeJeu.width-65, 20);
+	}
 
-    reset() {
-        this.life = 3;
-        this.score = 0;
-    }
+	addPoint(){
+		this.score += 1;
+		// console.log("score : " + this.score);
+	}
+	
+	retireVie(obj_all, machine){
+		if(this.lives == 0){
+			this.afficheFin(obj_all, machine, "Perdu !");
+		}
+		else{
+			this.lives -= 1;
+			// console.log("vie : " + this.lives);
+		}
+	}
 
-    draw(ctx) {
-        this.drawScore(ctx)
-        this.drawLife(ctx)
-    }
-
-    drawScore(ctx) {
-        ctx.font = '16px arial'
-        ctx.fillStyle = "#0095dd"
-        ctx.fillText("score : " + this.score, 8, 20)
-    }
-
-    drawLife(ctx) {
-        ctx.font = '16px arial'
-        ctx.fillStyle = "#0095dd"
-        ctx.fillText("life : " + this.life, ZoneDeJeu.width - 65, 20)
-    }
-
-    addPoint() {
-        this.score += 1;
-    }
-
-    retireVie() {
-        if (this.life == 0) {
-            this.afficheFin(obj_all, machine, 'perdu')
-        } else {
-            this.life -= 1;
-        }
-    }
-
-    afficheFin(obj_all, machine, message = "bravo") {
-        alert(message)
-        machine.generateEvent('jeu fini')
-        this.reset
-    }
+	afficheFin(obj_all, machine, message = "Bravo !"){
+		alert(message);
+		machine.generateEvent(jeuFini);
+		this.reset();
+	}
 }
 
-let jeuFini = SC.evt("fin");
-let progMaitreDuJeu = SC.par(
-    SC.generate(drawMe, SC.my('me'), SC.forever),
-    SC.seq(
-        SC.pause(),
-        SC.par(
-            SC.kill(
-                jeuFini,
-                SC.actionOn(briqueHere),
-                SC.NO_ACTION, SC.my('afficheFin'), 
-                SC.forever
-            )
-        ),
-        SC.actionOn(
-            addPoint,
-            SC.my("addPoint"),
-            undefined,
-            SC.forever
-        ),
-        SC.actionOn(
-            retireVie,
-            SC.my("retireVie"),
-            undefined,
-            SC.forever
-        )
-    )
-)
+//================================================================
+//							le cube 
+//================================================================
+/*
+	le comportement du cube qui a le maître du jeu : 
+	il gère le score et les vies et dit quand la partie est finie
+	quand il n'y a plus de vie la partie est finie et perdue
+	quand il n'y a plus de brique la partie est finie et gagnée
+*/ 
 
-let cubeMaitreDuJeu = SC.cube(new MaitreDuJeu(), progMaitreDuJeu)
+var jeuFini = SC.evt("FIN");
+
+var progMaitreDuJeu = SC.par(
+	SC.generate(drawMe, SC.my("me"), SC.forever), 
+	SC.seq(
+		SC.pause(), 
+		SC.par(SC.kill( jeuFini, SC.actionOn(briqueHere, SC.NO_ACTION, SC.my("afficheFin"), SC.forever)), 
+			SC.actionOn(addPoint, SC.my("addPoint"), undefined, SC.forever), 
+			SC.actionOn(retireVie, SC.my("retireVie"), undefined, SC.forever)
+		)
+	)
+);
+
+//le cube 
+var cubeMaitreDuJeu = SC.cube(new MaitreDuJeu(), progMaitreDuJeu);

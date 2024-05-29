@@ -1,56 +1,68 @@
 class Raquette {
-    constructor() {
-        this.height = 10;
-        this.width = 80;
-
-        this.y = ZoneDeJeu.height - this.height;
-        this.reset()
-    }
-
-    reset() {
-        this.x = (ZoneDeJeu.width - this.width) / 2
-    }
-
-    draw(ctx) {
-        ctx.beginPath();
-        ctx.rect(this.x, this.y, this.width, this.height)
-        ctx.fillStyle = "#32a8a4";
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    bouge() {
-        //guillaume fait la souris et pour demain le groupe fait le tactile
-
-        document.addEventListener('mousemove', evt => {
-            let relativeX = evt.clientX - ZoneDeJeu.offsetLeft;
-            let min = Math.floor(this.width / 2);
-            let max = ZoneDeJeu.width - min
-
-            if (relativeX > min && relativeX < max) {
-                this.x = relativeX - min;
-            }
-        }, false);
-
-    }
-
-    verifSiTouched(obj_all, machine) {
-        const radius = obj_all['balleHere'][0].radius;
-        const yBalle = obj_all['balleHere'][0].y + radius;
-        const xBalle = obj_all['balleHere'][0].x;
-
-        if (yBalle == this.y && xBalle + radius > this.x && xBalle - radius < this.x + this.width) {
-            obj_all['balleHere'][0].rebondit('y')
-        }
-
-
-    }
+	constructor() {
+		this.height = 10;
+		this.width = 80;
+		this.y = zoneDeJeu.height - this.height;
+		this.reset();
+	}
+	
+	reset(){
+		this.x = (zoneDeJeu.width - this.width)/2;
+	}
+	
+	draw(ctx){
+		ctx.beginPath();
+		//(xCoinSupG, yCoinSupG, width, height);
+		ctx.rect(this.x, this.y, this.width, this.height); 
+		ctx.fillStyle = "red";
+		ctx.fill();
+		ctx.closePath();
+	}
+	
+	bouge(){
+		//souris (plus tard souris et tactile)
+		document.addEventListener(
+			"mousemove", evt=>{
+				let relativeX = evt.clientX - zoneDeJeu.offsetLeft;
+				
+				//pour éviter que la raquette n'entre dans les murs
+				let min = Math.floor(this.width/2);
+				let max = zoneDeJeu.width - min;
+				
+				if(relativeX > min && relativeX < max) {
+					this.x = relativeX - min;
+				}
+			},
+			false);
+	}
+	
+	verifSiTouched(obj_all, machine){
+		const radius = obj_all[ballHere][0].radius;
+		const yBall = obj_all[ballHere][0].y + radius;
+		const xBall = obj_all[ballHere][0].x;
+		if(
+			yBall == this.y 
+			&& xBall+radius > this.x 
+			&& xBall-radius < this.x+this.width
+		){
+			obj_all[ballHere][0].rebondit("y");
+			// console.log("touché");
+		}
+	}
 }
 
-var progRaquette = SC.par(
-    SC.actionOn(balleHere, SC.my('verifSiTouched'), undefined, SC.forever),
-    SC.action(SC.my('bouge')),
-    SC.generate(drawMe, SC.my('me'), SC.forever)
-)
+//================================================================
+//							le cube 
+//================================================================
 
-var cubeRaquette = DC.cube(new Raquette(), progRaquette)
+//le comportement du cube qui a la raquette
+var progRaquette = SC.par(
+	SC.actionOn(ballHere, SC.my("verifSiTouched"), undefined, SC.forever)
+	, SC.action( SC.my("bouge") )//se déplace
+	, SC.generate(drawMe, SC.my("me"), SC.forever)
+);
+
+//le cube
+var cubeRaquette = SC.cube(new Raquette(), progRaquette);
+
+//Par contre le kill devrait être lui même dans un repeat qui indique le nombre de point de vie... JFS (A implémenter)
